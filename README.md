@@ -159,6 +159,10 @@ The project includes Docker configuration for containerized deployment:
 
 To run with Docker:
 ```bash
+# Create .env file in the root directory
+cp .env.example .env
+
+# Then
 docker-compose up -d
 ```
 
