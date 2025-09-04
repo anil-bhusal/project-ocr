@@ -1,0 +1,21 @@
+# Development Dockerfile for client
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock* ./
+
+# Install all dependencies (including dev)
+RUN yarn install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Start Vite development server
+CMD ["yarn", "dev", "--host"]

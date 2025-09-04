@@ -1,0 +1,167 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+@keyframes selectionPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes wordSelect {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes floatingInputFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.6), 0 0 30px rgba(0, 123, 255, 0.3);
+  }
+
+  100% {
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+  }
+}
+
+@keyframes highlightGlow {
+  0% {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+
+  50% {
+    background-color: rgba(0, 123, 255, 0.2);
+  }
+
+  100% {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #1565c0;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.word-overlay {
+  position: relative;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.word-overlay::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: transparent;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.word-overlay:hover::before {
+  opacity: 1;
+  background: linear-gradient(45deg,
+      rgba(0, 123, 255, 0.1),
+      rgba(0, 123, 255, 0.05));
+}
+
+.word-overlay.selected {
+  background-color: rgba(40, 167, 69, 0.15) !important;
+  box-shadow: 0 0 0 1px rgba(40, 167, 69, 0.4) !important;
+}
+
+.word-overlay.selected:hover {
+  background-color: rgba(40, 167, 69, 0.25) !important;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.5) !important;
+}
+
+.pdf-text-cursor {
+  cursor: text !important;
+}
+
+.selection-container {
+  will-change: transform;
+}
+
+.smooth-transition {
+  transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+
+.document-upload-icon svg {
+  width: 48px;
+  height: 48px;
+  fill: currentcolor;
+}
+
+
+.upload-success-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white !important;
+  font-size: 24px !important;
+  font-weight: bold;
+}

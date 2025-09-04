@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # OCR Server Microservice - Development Mode
+  ocr-server-dev:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: ocr-server-dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+      - "9229:9229"  # Node.js debugger port
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - OCR_API_KEY=${OCR_API_KEY}
+      - OCR_API_URL=${OCR_API_URL}
+      - FRONTEND_URL=http://localhost:5000
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
+    networks:
+      - ocr-network-dev
+    volumes:
+      - ./server/src:/app/src:delegated
+      - ./server/package.json:/app/package.json
+      - ./server/tsconfig.json:/app/tsconfig.json
+      - ./server/.env:/app/.env
+      - server-node-modules:/app/node_modules
+    command: yarn start:dev
+
+  # Client Application - Development Mode
+  ocr-client-dev:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: ocr-client-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - ocr-server-dev
+    networks:
+      - ocr-network-dev
+    volumes:
+      - ./client/src:/app/src:delegated
+      - ./client/public:/app/public:delegated
+      - ./client/index.html:/app/index.html
+      - ./client/package.json:/app/package.json
+      - ./client/vite.config.ts:/app/vite.config.ts
+      - ./client/tsconfig.json:/app/tsconfig.json
+      - client-node-modules:/app/node_modules
+    command: yarn dev --host
+
+networks:
+  ocr-network-dev:
+    driver: bridge
+    name: ocr-network-dev
+
+volumes:
+  server-node-modules:
+    driver: local
+  client-node-modules:
+    driver: local
