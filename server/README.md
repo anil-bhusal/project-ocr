@@ -72,11 +72,6 @@ yarn test
 # or
 npm test
 
-# Watch mode
-yarn test:watch
-# or
-npm run test:watch
-
 # Test coverage
 yarn test:cov
 # or
