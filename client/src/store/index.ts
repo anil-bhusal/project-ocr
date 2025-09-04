@@ -19,7 +19,7 @@ export const store = configureStore({
     }),
 
   // enable redux DevTools in development
-  devTools: import.meta.env.VITE_ENV === 'development',
+  devTools: import.meta.env.MODE === 'development',
 });
 
 // export types
