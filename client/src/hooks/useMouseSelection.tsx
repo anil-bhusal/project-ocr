@@ -106,6 +106,11 @@ export const useMouseSelection = ({
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     if (!imageRef.current) return;
 
+    // this allows Ctrl/Shift+click to work properly on words
+    if (event.ctrlKey || event.metaKey || event.shiftKey) {
+      return; // word click handler deal with it
+    }
+
     const coords = getImageCoordinates(event.clientX, event.clientY);
     if (!coords) return;
 
@@ -113,7 +118,7 @@ export const useMouseSelection = ({
     const wordAtPosition = findWordAtPosition(x, y);
 
     if (wordAtPosition) {
-      // clicked on a word - start text selection
+      // only start text selection if no Ctrl/Shift are pressed
       setIsTextSelecting(true);
       setTextSelectionStart({
         wordId: wordAtPosition.wordId,
