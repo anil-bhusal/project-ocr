@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import reducer, { addToUploadHistory, clearApiError, clearOCRData, setApiError, setLastProcessedFile, setOCRData, setProcessingStatus } from '../ocrApiSlice'
+import reducer, { clearApiError, clearOCRData, setApiError, setLastProcessedFile, setOCRData, setProcessingStatus } from '../ocrApiSlice'
 
 
 describe('ocrApiSlice', () => {
@@ -8,7 +8,6 @@ describe('ocrApiSlice', () => {
     isProcessing: false,
     lastError: null,
     lastProcessedFile: null,
-    uploadHistory: []
   }
 
   it('returns initial state', () => {
@@ -49,13 +48,5 @@ describe('ocrApiSlice', () => {
     const fileName = 'test.jpg'
     const state = reducer(initialState, setLastProcessedFile(fileName))
     expect(state.lastProcessedFile).toBe(fileName)
-  })
-
-  it('handles addToUploadHistory', () => {
-    const upload = { fileName: 'test.jpg', status: 'success', wordCount: 10 }
-    const state = reducer(initialState, addToUploadHistory(upload as any))
-    expect(state.uploadHistory).toHaveLength(1)
-    expect(state.uploadHistory[0]).toMatchObject(upload)
-    expect(state.uploadHistory[0].timestamp).toBeDefined()
   })
 })

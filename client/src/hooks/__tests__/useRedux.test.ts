@@ -14,7 +14,6 @@ const createMockStore = () => {
         isProcessing: false,
         lastError: null,
         lastProcessedFile: null,
-        uploadHistory: []
       })
     }
   })

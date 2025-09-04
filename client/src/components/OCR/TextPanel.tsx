@@ -31,7 +31,8 @@ export const TextPanel: React.FC<TextPanelProps> = ({ wordSelection, onTextChang
           placeholder="Selected text appears here..."
           style={{
             width: "100%",
-            height: "calc(100% - 60px)",
+            height: "24vh",
+            maxHeight: "30vh",
             padding: "8px",
             fontSize: "12px",
             fontFamily: "monospace",

@@ -17,7 +17,6 @@ describe('Redux Store', () => {
     expect(state.ocrApiState).toHaveProperty('isProcessing')
     expect(state.ocrApiState).toHaveProperty('lastError')
     expect(state.ocrApiState).toHaveProperty('lastProcessedFile')
-    expect(state.ocrApiState).toHaveProperty('uploadHistory')
   })
 
   it('should have dispatch function', () => {
