@@ -8,7 +8,6 @@ A web application for extracting text from images using OCR technology. Built wi
 - Interactive text selection and highlighting
 - Edit extracted text with floating input
 - Zoom controls for better visibility
-- Multiple selection modes (click, drag, shift-click, ctrl-click)
 
 ## Prerequisites
 
