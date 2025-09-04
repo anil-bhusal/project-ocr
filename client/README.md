@@ -33,8 +33,6 @@ yarn dev          # Start development server
 yarn build        # Build for production
 yarn preview      # Preview production build
 yarn test         # Run tests
-yarn lint         # Run ESLint
-yarn type-check   # Check TypeScript types
 ```
 
 ## Project Structure
@@ -63,12 +61,6 @@ Tests are written using Vitest and React Testing Library:
 ```bash
 # Run all tests
 yarn test
-
-# Run tests in watch mode
-yarn test:watch
-
-# Generate coverage report
-yarn test:coverage
 ```
 
 ## Building
