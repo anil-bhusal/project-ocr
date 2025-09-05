@@ -27,14 +27,18 @@ describe('OcrService', () => {
 
       const module: TestingModule = await Test.createTestingModule({
         providers: [
-          OcrService, 
+          OcrService,
           {
             provide: TextParserService,
             useValue: {
-              createWordsFromText: jest.fn().mockReturnValue({ words: [], lines: [] }),
-              estimateImageDimensions: jest.fn().mockReturnValue({ width: 1200, height: 1600 })
-            }
-          }
+              createWordsFromText: jest
+                .fn()
+                .mockReturnValue({ words: [], lines: [] }),
+              estimateImageDimensions: jest
+                .fn()
+                .mockReturnValue({ width: 1200, height: 1600 }),
+            },
+          },
         ],
       }).compile();
 
@@ -76,7 +80,7 @@ describe('OcrService', () => {
         }),
       };
 
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const result = await service.processOCR(mockFile);
 
@@ -112,9 +116,9 @@ describe('OcrService', () => {
     it('should throw error when file buffer is empty', async () => {
       const emptyFile = { ...mockFile, buffer: undefined };
 
-      await expect(service.processOCR(emptyFile as any)).rejects.toThrow(
-        'File buffer is empty!',
-      );
+      await expect(
+        service.processOCR(emptyFile as Express.Multer.File),
+      ).rejects.toThrow('File buffer is empty!');
     });
 
     it('should throw error when OCR API key is not defined', async () => {
@@ -129,10 +133,14 @@ describe('OcrService', () => {
           {
             provide: TextParserService,
             useValue: {
-              createWordsFromText: jest.fn().mockReturnValue({ words: [], lines: [] }),
-              estimateImageDimensions: jest.fn().mockReturnValue({ width: 1200, height: 1600 })
-            }
-          }
+              createWordsFromText: jest
+                .fn()
+                .mockReturnValue({ words: [], lines: [] }),
+              estimateImageDimensions: jest
+                .fn()
+                .mockReturnValue({ width: 1200, height: 1600 }),
+            },
+          },
         ],
       }).compile();
 
@@ -155,10 +163,14 @@ describe('OcrService', () => {
           {
             provide: TextParserService,
             useValue: {
-              createWordsFromText: jest.fn().mockReturnValue({ words: [], lines: [] }),
-              estimateImageDimensions: jest.fn().mockReturnValue({ width: 1200, height: 1600 })
-            }
-          }
+              createWordsFromText: jest
+                .fn()
+                .mockReturnValue({ words: [], lines: [] }),
+              estimateImageDimensions: jest
+                .fn()
+                .mockReturnValue({ width: 1200, height: 1600 }),
+            },
+          },
         ],
       }).compile();
 
@@ -175,7 +187,7 @@ describe('OcrService', () => {
         status: 500,
       };
 
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       await expect(service.processOCR(mockFile)).rejects.toThrow(
         'OCR API request failed with status: 500',
@@ -191,7 +203,7 @@ describe('OcrService', () => {
         }),
       };
 
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       await expect(service.processOCR(mockFile)).rejects.toThrow(
         'OCR processing failed: Invalid image format',
@@ -212,7 +224,7 @@ describe('OcrService', () => {
         }),
       };
 
-      mockFetch.mockResolvedValue(mockResponse as any);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const result = await service.processOCR(mockFile);
 

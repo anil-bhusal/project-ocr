@@ -28,7 +28,7 @@ export const useMouseSelection = ({
   imageRef,
   containerRef,
   selectionBoxRef,
-  wordSelection: _wordSelection,
+  wordSelection: __wordSelection,
   isTextSelecting,
   textSelectionStart,
   getWordsBetween,
@@ -36,7 +36,7 @@ export const useMouseSelection = ({
   setIsTextSelecting,
   setTextSelectionStart,
   setIsDragging,
-  zoomLevel,
+  zoomLevel: __zoomLevel,
 }: MouseSelectionProps) => {
   // animation frame for smooth selection box updates
   const rafRef = useRef<number>(0);
@@ -81,7 +81,7 @@ export const useMouseSelection = ({
       x: Math.max(0, Math.min(x, actualWidth)),
       y: Math.max(0, Math.min(y, actualHeight))
     };
-  }, [zoomLevel]);
+  }, [containerRef, imageRef]);
 
   // find which word is at the given coordinates
   const findWordAtPosition = useCallback((x: number, y: number): OCRWord | null => {
@@ -101,7 +101,7 @@ export const useMouseSelection = ({
       return x >= wordLeft && x <= wordRight &&
         y >= wordTop && y <= wordBottom;
     }) || null;
-  }, [ocrData]);
+  }, [ocrData, imageRef]);
 
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     if (!imageRef.current) return;
@@ -138,7 +138,7 @@ export const useMouseSelection = ({
     }
 
     event.preventDefault();
-  }, [findWordAtPosition, handleUpdateWordSelection, getImageCoordinates, setIsTextSelecting, setTextSelectionStart, setIsDragging]);
+  }, [findWordAtPosition, handleUpdateWordSelection, getImageCoordinates, setIsTextSelecting, setTextSelectionStart, setIsDragging, imageRef]);
 
   // update selection box position and size during drag
   const updateSelectionBox = useCallback(() => {
@@ -155,7 +155,7 @@ export const useMouseSelection = ({
       height: `${Math.abs(currentY - startY)}px`,
       display: 'block'
     });
-  }, []);
+  }, [selectionBoxRef]);
 
   // throttled mouse move handler to avoid performance issues
   const handleMouseMoveThrottled = useMemo(() => throttle((event: MouseEvent) => {
@@ -188,7 +188,7 @@ export const useMouseSelection = ({
       rafRef.current = requestAnimationFrame(updateSelectionBox);
     }
   }, OCR_CONFIG.THROTTLE_DELAY),
-    [updateSelectionBox, isTextSelecting, textSelectionStart, findWordAtPosition, getWordsBetween, ocrData, handleUpdateWordSelection, getImageCoordinates]
+    [updateSelectionBox, isTextSelecting, textSelectionStart, findWordAtPosition, getWordsBetween, ocrData, handleUpdateWordSelection, getImageCoordinates, imageRef]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -239,7 +239,7 @@ export const useMouseSelection = ({
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
     }
-  }, [isTextSelecting, ocrData, handleUpdateWordSelection, setIsTextSelecting, setTextSelectionStart, setIsDragging]);
+  }, [isTextSelecting, ocrData, handleUpdateWordSelection, setIsTextSelecting, setTextSelectionStart, setIsDragging, imageRef, selectionBoxRef]);
 
   // setup global event listeners for drag/selection
   useEffect(() => {

@@ -31,7 +31,7 @@ interface ImageViewerProps {
   onClearSelection: () => void;
   setHoveredWordId: (id: number | null) => void;
   setShowFloatingInput: (show: boolean) => void;
-  setWordSelection: (selection: any) => void;
+  setWordSelection: (selection: { wordIds: Set<number>; selectedWords: OCRWord[]; selectedText: string } | ((prev: { wordIds: Set<number>; selectedWords: OCRWord[]; selectedText: string }) => { wordIds: Set<number>; selectedWords: OCRWord[]; selectedText: string })) => void;
 }
 
 export const ImageViewer: React.FC<ImageViewerProps> = ({
@@ -131,7 +131,7 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
               <FloatingInput
                 position={floatingInputPosition}
                 wordSelection={wordSelection}
-                onTextChange={(text) => setWordSelection((prev: any) => ({ ...prev, selectedText: text }))}
+                onTextChange={(text) => setWordSelection((prev) => ({ ...prev, selectedText: text }))}
                 onClear={() => {
                   onClearSelection();
                   setShowFloatingInput(false);

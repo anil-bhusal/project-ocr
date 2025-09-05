@@ -3,50 +3,50 @@ import { ApiProperty } from '@nestjs/swagger';
 export class OCRWordDto {
   @ApiProperty({
     description: 'The extracted text content of the word',
-    example: 'Hello'
+    example: 'Hello',
   })
   text: string;
 
   @ApiProperty({
     description: 'Left position (x-coordinate) of the word in pixels',
-    example: 10
+    example: 10,
   })
   left: number;
 
   @ApiProperty({
-    description: 'Top position (y-coordinate) of the word in pixels', 
-    example: 20
+    description: 'Top position (y-coordinate) of the word in pixels',
+    example: 20,
   })
   top: number;
 
   @ApiProperty({
     description: 'Width of the word bounding box in pixels',
-    example: 50
+    example: 50,
   })
   width: number;
 
   @ApiProperty({
     description: 'Height of the word bounding box in pixels',
-    example: 15
+    example: 15,
   })
   height: number;
 
   @ApiProperty({
     description: 'Unique identifier for the word within the document',
-    example: 1
+    example: 1,
   })
   wordId: number;
 
   @ApiProperty({
     description: 'Line identifier that this word belongs to',
-    example: 0
+    example: 0,
   })
   lineId: number;
 
   @ApiProperty({
     description: 'Confidence score of OCR accuracy (0.0 to 1.0)',
     example: 0.95,
-    required: false
+    required: false,
   })
   confidence?: number;
 }
@@ -54,43 +54,43 @@ export class OCRWordDto {
 export class OCRLineDto {
   @ApiProperty({
     description: 'Unique identifier for the line',
-    example: 0
+    example: 0,
   })
   lineId: number;
 
   @ApiProperty({
     description: 'Array of words contained in this line',
-    type: [OCRWordDto]
+    type: [OCRWordDto],
   })
   words: OCRWordDto[];
 
   @ApiProperty({
     description: 'Left position of the entire line',
-    example: 10
+    example: 10,
   })
   left: number;
 
   @ApiProperty({
     description: 'Top position of the entire line',
-    example: 20
+    example: 20,
   })
   top: number;
 
   @ApiProperty({
     description: 'Width of the entire line',
-    example: 200
+    example: 200,
   })
   width: number;
 
   @ApiProperty({
     description: 'Height of the entire line',
-    example: 15
+    example: 15,
   })
   height: number;
 
   @ApiProperty({
     description: 'Combined text of all words in the line',
-    example: 'Hello World'
+    example: 'Hello World',
   })
   text: string;
 }
@@ -98,26 +98,45 @@ export class OCRLineDto {
 export class DetectedFieldDto {
   @ApiProperty({
     description: 'Type of detected field',
-    enum: ['invoice_number', 'date', 'amount', 'customer_name', 'total', 'subtotal', 'tax', 'due_date', 'unknown'],
-    example: 'invoice_number'
+    enum: [
+      'invoice_number',
+      'date',
+      'amount',
+      'customer_name',
+      'total',
+      'subtotal',
+      'tax',
+      'due_date',
+      'unknown',
+    ],
+    example: 'invoice_number',
   })
-  fieldType: 'invoice_number' | 'date' | 'amount' | 'customer_name' | 'total' | 'subtotal' | 'tax' | 'due_date' | 'unknown';
+  fieldType:
+    | 'invoice_number'
+    | 'date'
+    | 'amount'
+    | 'customer_name'
+    | 'total'
+    | 'subtotal'
+    | 'tax'
+    | 'due_date'
+    | 'unknown';
 
   @ApiProperty({
     description: 'Extracted value of the field',
-    example: 'INV-2024-001'
+    example: 'INV-2024-001',
   })
   value: string;
 
   @ApiProperty({
     description: 'Confidence score for field detection accuracy',
-    example: 0.89
+    example: 0.89,
   })
   confidence: number;
 
   @ApiProperty({
     description: 'Words that make up this field',
-    type: [OCRWordDto]
+    type: [OCRWordDto],
   })
   words: OCRWordDto[];
 
@@ -127,8 +146,8 @@ export class DetectedFieldDto {
       left: 100,
       top: 50,
       width: 120,
-      height: 20
-    }
+      height: 20,
+    },
   })
   coordinates: {
     left: number;
@@ -140,7 +159,8 @@ export class DetectedFieldDto {
 
 export class EnhancedOCRResponseDto {
   @ApiProperty({
-    description: 'Array of extracted words with positioning and metadata. Optimized response contains only words array to reduce payload size by 60-70%.',
+    description:
+      'Array of extracted words with positioning and metadata. Optimized response contains only words array to reduce payload size by 60-70%.',
     type: [OCRWordDto],
     example: [
       {
@@ -151,7 +171,7 @@ export class EnhancedOCRResponseDto {
         height: 15,
         wordId: 1,
         lineId: 0,
-        confidence: 0.95
+        confidence: 0.95,
       },
       {
         text: 'World',
@@ -161,9 +181,9 @@ export class EnhancedOCRResponseDto {
         height: 15,
         wordId: 2,
         lineId: 0,
-        confidence: 0.92
-      }
-    ]
+        confidence: 0.92,
+      },
+    ],
   })
   words: OCRWordDto[];
 }

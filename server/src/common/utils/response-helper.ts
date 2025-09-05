@@ -8,12 +8,18 @@ export class ResponseHelper {
   }
 
   // created response
-  static created<T>(data: T, message: string = 'Created successfully'): ResponseDto<T> {
+  static created<T>(
+    data: T,
+    message: string = 'Created successfully',
+  ): ResponseDto<T> {
     return new ResponseDto(HttpStatus.CREATED, true, message, data);
   }
 
   // error response
-  static error(message: string, statusCode: number = HttpStatus.BAD_REQUEST): ResponseDto {
+  static error(
+    message: string,
+    statusCode: number = HttpStatus.BAD_REQUEST,
+  ): ResponseDto {
     return new ResponseDto(statusCode, false, message);
   }
 

@@ -101,7 +101,7 @@ describe('useOCRSelection', () => {
   it('returns result object from updateWordSelection', () => {
     const { result } = renderHook(() => useOCRSelection(mockOCRData))
 
-    let updateResult: any
+    let updateResult: { orderedWords: Array<{ wordId: number; text: string; }>; selectedText: string } | undefined
     act(() => {
       const wordIds = new Set([1, 2])
       updateResult = result.current.updateWordSelection(wordIds)
@@ -109,8 +109,8 @@ describe('useOCRSelection', () => {
 
     expect(updateResult).toHaveProperty('orderedWords')
     expect(updateResult).toHaveProperty('selectedText')
-    expect(updateResult.orderedWords).toHaveLength(2)
-    expect(updateResult.selectedText).toBe('Hello World')
+    expect(updateResult!.orderedWords).toHaveLength(2)
+    expect(updateResult!.selectedText).toBe('Hello World')
   })
 
   it('handles null OCR data gracefully', () => {

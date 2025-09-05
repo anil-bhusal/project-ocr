@@ -26,7 +26,7 @@ afterAll(() => {
 
 // Mock child components
 vi.mock('../OCR/FileUploadSection', () => ({
-  FileUploadSection: ({ onFileChange, onDragOver, onDragLeave, onDrop }: any) => (
+  FileUploadSection: ({ onFileChange, onDragOver, onDragLeave, onDrop }: { onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void; onDragOver: (e: React.DragEvent) => void; onDragLeave: (e: React.DragEvent) => void; onDrop: (e: React.DragEvent) => void }) => (
     <div
       data-testid="dropzone"
       onDragOver={onDragOver}
@@ -39,7 +39,7 @@ vi.mock('../OCR/FileUploadSection', () => ({
 }));
 
 vi.mock('../OCR/UploadStatusBar', () => ({
-  UploadStatusBar: ({ onUploadNew }: any) => (
+  UploadStatusBar: ({ onUploadNew }: { onUploadNew: () => void }) => (
     <button data-testid="upload-new" onClick={onUploadNew}>
       Upload New
     </button>
@@ -56,7 +56,7 @@ vi.mock('../LoadingFallback', () => ({
 }));
 
 describe('OCRUploader', () => {
-  let mockMutate: any;
+  let mockMutate: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockMutate = vi.fn();
@@ -116,7 +116,7 @@ describe('OCRUploader', () => {
 
     // simulate OCR success
     await act(async () => {
-      const onSuccess = (useOCRMutation as unknown as Mock).mock.calls[0]?.[0]?.onSuccess!;
+      const onSuccess = (useOCRMutation as unknown as Mock).mock.calls[0]?.[0]?.onSuccess;
       onSuccess({ words: [] });
     });
 
@@ -138,7 +138,7 @@ describe('OCRUploader', () => {
 
     // simulate OCR error
     await act(async () => {
-      const onError = (useOCRMutation as unknown as Mock).mock.calls[0]?.[0]?.onError!;
+      const onError = (useOCRMutation as unknown as Mock).mock.calls[0]?.[0]?.onError;
       onError(new Error('OCR failed'));
     });
 
@@ -179,7 +179,7 @@ it('handles drag and drop of an image file', async () => {
 
     // simulate OCR success with words
     await act(async () => {
-      const onSuccess = (useOCRMutation as unknown as Mock).mock.calls[0]?.[0]?.onSuccess!;
+      const onSuccess = (useOCRMutation as unknown as Mock).mock.calls[0]?.[0]?.onSuccess;
       onSuccess({
         words: [
           { wordId: 1, text: 'hello', top: 0, left: 0, width: 10, height: 10, lineId: 1 },

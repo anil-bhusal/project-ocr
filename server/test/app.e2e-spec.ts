@@ -12,29 +12,31 @@ describe('OCR E2E', () => {
   beforeEach(async () => {
     // Set NODE_ENV to production to hide stack traces
     process.env.NODE_ENV = 'production';
-    
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    
+
     // Enable CORS
     app.enableCors({
       origin: '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       allowedHeaders: '*',
     });
-    
+
     // Add security headers
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+          },
         },
-      },
-    }));
-    
+      }),
+    );
+
     // Apply same middleware as production
     app.useGlobalPipes(
       new ValidationPipe({
@@ -44,9 +46,9 @@ describe('OCR E2E', () => {
         disableErrorMessages: false, // Enable for testing
       }),
     );
-    
+
     app.useGlobalFilters(new SecurityExceptionFilter());
-    
+
     await app.init();
   });
 
@@ -59,12 +61,12 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toEqual({
             statusCode: 200,
             success: true,
             message: 'API is running successfully',
-            data: 'Hello World!'
+            data: 'Hello World!',
           });
         });
     });
@@ -72,9 +74,7 @@ describe('OCR E2E', () => {
 
   describe('/ocr/upload (POST)', () => {
     it('should reject requests without files', () => {
-      return request(app.getHttpServer())
-        .post('/ocr/upload')
-        .expect(400);
+      return request(app.getHttpServer()).post('/ocr/upload').expect(400);
     });
 
     it('should reject non-image files', () => {
@@ -82,7 +82,7 @@ describe('OCR E2E', () => {
         .post('/ocr/upload')
         .attach('file', Buffer.from('not an image'), 'test.txt')
         .expect(400)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body.message).toContain('Invalid file type');
         });
     });
@@ -90,10 +90,10 @@ describe('OCR E2E', () => {
     it('should reject oversized files', () => {
       const largeBuffer = Buffer.alloc(11 * 1024 * 1024); // 11MB
       // Create a fake JPEG header
-      largeBuffer[0] = 0xFF;
-      largeBuffer[1] = 0xD8;
-      largeBuffer[2] = 0xFF;
-      largeBuffer[3] = 0xE0;
+      largeBuffer[0] = 0xff;
+      largeBuffer[1] = 0xd8;
+      largeBuffer[2] = 0xff;
+      largeBuffer[3] = 0xe0;
 
       return request(app.getHttpServer())
         .post('/ocr/upload')
@@ -102,12 +102,12 @@ describe('OCR E2E', () => {
     });
 
     it('should reject files with dangerous filenames', () => {
-      const imageBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+      const imageBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG header
 
       return request(app.getHttpServer())
         .post('/ocr/upload')
         .attach('file', imageBuffer, '../evil.jpg')
-        .expect(res => {
+        .expect((res) => {
           // Accept either 400 or 500 as the server may handle this differently
           expect([400, 500]).toContain(res.status);
           expect(res.body.message).toBeDefined();
@@ -121,7 +121,7 @@ describe('OCR E2E', () => {
         .post('/ocr/upload')
         .attach('file', fakeImageBuffer, 'fake.jpg')
         .expect(400)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body.message).toContain('File content does not match');
         });
     });
@@ -151,13 +151,13 @@ describe('OCR E2E', () => {
 
   describe('Rate Limiting', () => {
     it('should accept requests within rate limit', async () => {
-      const validImageBuffer = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
-      
+      const validImageBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]); // JPEG header
+
       // First request should be accepted (even if it fails due to invalid OCR content)
       const response = await request(app.getHttpServer())
         .post('/ocr/upload')
         .attach('file', validImageBuffer, 'test.jpg');
-      
+
       // Should not be rate limited (status should be 400 for invalid content, not 429)
       expect(response.status).not.toBe(429);
     });
@@ -172,7 +172,7 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           expect(res.headers['access-control-allow-origin']).toBeDefined();
         });
     });
@@ -181,7 +181,7 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .options('/ocr/upload')
         .expect(204)
-        .expect(res => {
+        .expect((res) => {
           expect(res.headers['access-control-allow-methods']).toContain('POST');
         });
     });
@@ -192,7 +192,7 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           // Helmet security headers
           expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
           expect(res.headers['x-content-type-options']).toBe('nosniff');
@@ -204,9 +204,11 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .get('/')
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           expect(res.headers['content-security-policy']).toBeDefined();
-          expect(res.headers['content-security-policy']).toContain("default-src 'self'");
+          expect(res.headers['content-security-policy']).toContain(
+            "default-src 'self'",
+          );
         });
     });
   });
@@ -216,7 +218,7 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .post('/ocr/upload')
         .expect(400)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toHaveProperty('statusCode');
           expect(res.body).toHaveProperty('message');
           expect(res.body).toHaveProperty('timestamp');
@@ -228,7 +230,7 @@ describe('OCR E2E', () => {
       return request(app.getHttpServer())
         .post('/ocr/upload')
         .expect(400)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).not.toHaveProperty('stack');
         });
     });
@@ -246,16 +248,14 @@ describe('OCR E2E', () => {
   // Swagger is not enabled in test environment, skipping these tests
   describe.skip('API Documentation', () => {
     it('should serve Swagger documentation', () => {
-      return request(app.getHttpServer())
-        .get('/api-docs')
-        .expect(301); // Redirect to /api-docs/
+      return request(app.getHttpServer()).get('/api-docs').expect(301); // Redirect to /api-docs/
     });
 
     it('should serve Swagger JSON', () => {
       return request(app.getHttpServer())
         .get('/api-docs-json')
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body).toHaveProperty('info');
           expect(res.body).toHaveProperty('paths');
           expect(res.body.paths).toHaveProperty('/ocr/upload');

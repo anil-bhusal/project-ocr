@@ -77,7 +77,10 @@ describe('ResponseHelper', () => {
 
     it('should create an error response with custom status', () => {
       const message = 'Internal server error';
-      const result = ResponseHelper.error(message, HttpStatus.INTERNAL_SERVER_ERROR);
+      const result = ResponseHelper.error(
+        message,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
 
       expect(result.statusCode).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
       expect(result.message).toBe(message);
@@ -91,7 +94,7 @@ describe('ResponseHelper', () => {
         { code: HttpStatus.UNPROCESSABLE_ENTITY, message: 'Validation error' },
       ];
 
-      testCases.forEach(testCase => {
+      testCases.forEach((testCase) => {
         const result = ResponseHelper.error(testCase.message, testCase.code);
         expect(result.statusCode).toBe(testCase.code);
         expect(result.message).toBe(testCase.message);

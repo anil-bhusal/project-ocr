@@ -25,8 +25,8 @@ const createApiClient = (): AxiosInstance => {
         console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
       }
       
-      // add timestamp to request (using any for metadata extension)
-      (config as any).metadata = { startTime: Date.now() };
+      // add timestamp to request
+      (config as InternalAxiosRequestConfig & { metadata?: { startTime: number } }).metadata = { startTime: Date.now() };
       
       return config;
     },
@@ -41,7 +41,7 @@ const createApiClient = (): AxiosInstance => {
     (response: AxiosResponse) => {
       // log response details in development
       if (import.meta.env.DEV) {
-        const duration = Date.now() - ((response.config as any).metadata?.startTime || 0);
+        const duration = Date.now() - ((response.config as InternalAxiosRequestConfig & { metadata?: { startTime: number } }).metadata?.startTime || 0);
         console.log(`[API Response] ${response.status} ${response.config.url} (${duration}ms)`);
       }
       
@@ -57,7 +57,7 @@ const createApiClient = (): AxiosInstance => {
 
       if (error.response) {
         // server responded with error status
-        apiError.message = (error.response.data as any)?.message || `Server error: ${error.response.status}`;
+        apiError.message = (error.response.data as { message?: string })?.message || `Server error: ${error.response.status}`;
         apiError.status = error.response.status;
         
         console.error(`[API Error] ${error.response.status}: ${apiError.message}`);

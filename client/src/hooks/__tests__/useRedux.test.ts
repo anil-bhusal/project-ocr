@@ -20,9 +20,9 @@ const createMockStore = () => {
 }
 
 describe('useRedux hooks', () => {
-  const createWrapper = (store: any) => {
+  const createWrapper = (store: ReturnType<typeof createMockStore>) => {
     return ({ children }: { children: React.ReactNode }) =>
-      React.createElement(Provider, { store } as any, children)
+      React.createElement(Provider, { store, children })
   }
 
   it('useAppDispatch returns dispatch function', () => {

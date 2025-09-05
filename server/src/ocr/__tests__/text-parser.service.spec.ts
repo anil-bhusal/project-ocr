@@ -42,7 +42,7 @@ describe('TextParserService', () => {
       const text = 'Word1 Word2 Word3';
       const result = service.createWordsFromText(text);
 
-      const wordIds = result.words.map(w => w.wordId);
+      const wordIds = result.words.map((w) => w.wordId);
       const uniqueIds = new Set(wordIds);
       expect(uniqueIds.size).toBe(wordIds.length);
     });
@@ -138,7 +138,8 @@ describe('TextParserService', () => {
     });
 
     it('should estimate dimensions for long lines', () => {
-      const text = 'This is a very long line with many words that should result in a wider estimated width for the image';
+      const text =
+        'This is a very long line with many words that should result in a wider estimated width for the image';
       const dimensions = service.estimateImageDimensions(text);
 
       expect(dimensions.width).toBeGreaterThan(800);
@@ -157,10 +158,10 @@ describe('TextParserService', () => {
     it('should cap maximum dimensions', () => {
       const veryLongLine = 'x'.repeat(200);
       const manyLines = Array(100).fill('Line').join('\n');
-      
+
       const dimLong = service.estimateImageDimensions(veryLongLine);
       expect(dimLong.width).toBe(1600);
-      
+
       const dimTall = service.estimateImageDimensions(manyLines);
       expect(dimTall.height).toBe(2000);
     });
@@ -182,7 +183,8 @@ describe('TextParserService', () => {
     });
 
     it('should calculate based on longest line', () => {
-      const text = 'Short\nThis is a much longer line that should be wide\nShort';
+      const text =
+        'Short\nThis is a much longer line that should be wide\nShort';
       const dimensions = service.estimateImageDimensions(text);
 
       // The longest line is "This is a much longer line that should be wide" (47 chars)

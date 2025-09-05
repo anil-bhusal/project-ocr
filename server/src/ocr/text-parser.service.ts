@@ -3,16 +3,19 @@ import { OCRWordDto, OCRLineDto } from './dto/enhanced-ocr.dto';
 
 @Injectable()
 export class TextParserService {
-
   // fallback method to create word boundaries when ocr api doesn't provide TextOverlay
   // this creates approximate word positions based on text parsing
-  createWordsFromText(text: string, imageWidth: number = 1200, imageHeight: number = 1600): { words: OCRWordDto[], lines: OCRLineDto[] } {
+  createWordsFromText(
+    text: string,
+    imageWidth: number = 1200,
+    imageHeight: number = 1600,
+  ): { words: OCRWordDto[]; lines: OCRLineDto[] } {
     const lines: OCRLineDto[] = [];
     const allWords: OCRWordDto[] = [];
     let wordIdCounter = 0;
 
     // split text into lines
-    const textLines = text.split(/\r?\n/).filter(line => line.trim());
+    const textLines = text.split(/\r?\n/).filter((line) => line.trim());
 
     // estimate character width and height based on image size
     // approximate characters per line
@@ -28,10 +31,12 @@ export class TextParserService {
       if (!trimmedLine) return;
 
       // split line into words
-      const wordsInLine = trimmedLine.split(/\s+/).filter(word => word.length > 0);
+      const wordsInLine = trimmedLine
+        .split(/\s+/)
+        .filter((word) => word.length > 0);
 
       let currentX = leftMargin;
-      const currentY = topMargin + (lineIndex * avgLineHeight * 1.2);
+      const currentY = topMargin + lineIndex * avgLineHeight * 1.2;
       const lineWords: OCRWordDto[] = [];
 
       wordsInLine.forEach((wordText) => {
@@ -45,22 +50,22 @@ export class TextParserService {
           height: Math.round(avgLineHeight),
           wordId: ++wordIdCounter,
           lineId: lineIndex,
-          confidence: 0.8 // default confidence = 0.8 for parsed text
+          confidence: 0.8, // default confidence = 0.8 for parsed text
         };
 
         lineWords.push(word);
         allWords.push(word);
 
         // move to next word position (word width + space)
-        currentX += wordWidth + (avgCharWidth * 0.5);
+        currentX += wordWidth + avgCharWidth * 0.5;
       });
 
       if (lineWords.length > 0) {
         // calculating   line boundaries
-        const lineLeft = Math.min(...lineWords.map(w => w.left));
-        const lineTop = Math.min(...lineWords.map(w => w.top));
-        const lineRight = Math.max(...lineWords.map(w => w.left + w.width));
-        const lineBottom = Math.max(...lineWords.map(w => w.top + w.height));
+        const lineLeft = Math.min(...lineWords.map((w) => w.left));
+        const lineTop = Math.min(...lineWords.map((w) => w.top));
+        const lineRight = Math.max(...lineWords.map((w) => w.left + w.width));
+        const lineBottom = Math.max(...lineWords.map((w) => w.top + w.height));
 
         lines.push({
           lineId: lineIndex,
@@ -69,7 +74,7 @@ export class TextParserService {
           top: lineTop,
           width: lineRight - lineLeft,
           height: lineBottom - lineTop,
-          text: trimmedLine
+          text: trimmedLine,
         });
       }
     });
@@ -79,8 +84,8 @@ export class TextParserService {
 
   // estimate image dimensions from text content if not provided
   estimateImageDimensions(text: string): { width: number; height: number } {
-    const lines = text.split(/\r?\n/).filter(line => line.trim());
-    const maxLineLength = Math.max(...lines.map(line => line.length));
+    const lines = text.split(/\r?\n/).filter((line) => line.trim());
+    const maxLineLength = Math.max(...lines.map((line) => line.length));
 
     // rough estimation based on content
     const estimatedWidth = Math.max(800, Math.min(1600, maxLineLength * 12));
@@ -88,7 +93,7 @@ export class TextParserService {
 
     return {
       width: estimatedWidth,
-      height: estimatedHeight
+      height: estimatedHeight,
     };
   }
 }

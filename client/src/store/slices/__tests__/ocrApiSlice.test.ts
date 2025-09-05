@@ -16,8 +16,8 @@ describe('ocrApiSlice', () => {
   })
 
   it('handles setOCRData', () => {
-    const ocrData = { words: [{ text: 'test', wordId: 1 }] }
-    const state = reducer(initialState, setOCRData(ocrData as any))
+    const ocrData = { words: [{ text: 'test', wordId: 1, left: 0, top: 0, width: 10, height: 10, lineId: 1 }] }
+    const state = reducer(initialState, setOCRData(ocrData))
     expect(state.currentOCRData).toEqual(ocrData)
   })
 
