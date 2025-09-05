@@ -78,8 +78,23 @@ const OCRUploader: React.FC = () => {
     await handleFileUpload(file);
   };
 
+  // reset all state to their initial values
+  const resetState = useCallback(() => {
+    setOcrData(null);
+    clearWordSelection();
+    setIsDragging(false);
+    setHoveredWordId(null);
+    setShowFloatingInput(false);
+  }, [clearWordSelection]);
+
+  // process ocr on the selected file
+  const processOCR = useCallback(async (file: File) => {
+    setIsProcessing(true);
+    ocrMutation.mutate({ file });
+  }, [ocrMutation]);
+
   // handle file upload (for input and drag-drop)
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
@@ -88,7 +103,7 @@ const OCRUploader: React.FC = () => {
     setImageUrl(URL.createObjectURL(file));
     resetState();
     await processOCR(file);
-  };
+  }, [resetState, processOCR]);
 
   // handle drag over event
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -118,22 +133,7 @@ const OCRUploader: React.FC = () => {
     } else {
       alert('Please drop an image file');
     }
-  }, []);
-
-  // reset all state to their  .initial values
-  const resetState = useCallback(() => {
-    setOcrData(null);
-    clearWordSelection();
-    setIsDragging(false);
-    setHoveredWordId(null);
-    setShowFloatingInput(false);
-  }, [clearWordSelection]);
-
-  // [process ocr on the selected file
-  const processOCR = async (file: File) => {
-    setIsProcessing(true);
-    ocrMutation.mutate({ file });
-  };
+  }, [handleFileUpload]);
 
   // update floating input position based on selection
   const updateFloatingInputPosition = useCallback((orderedWords: OCRWord[]) => {
@@ -167,7 +167,7 @@ const OCRUploader: React.FC = () => {
       y: selectionBottom + 12
     });
     setShowFloatingInput(true);
-  }, [zoomLevel]); // Aadded zoomLevel dependency  here to recalculate on zoom
+  }, []); // zoomLevel is not actually used in this function
 
   // handle word selection update
   const handleUpdateWordSelection = useCallback((wordIds: Set<number>) => {

@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { BadRequestException } from '@nestjs/common';
 import { OcrController } from '../ocr.controller';
 import { OcrService } from '../ocr.service';
-import { FileValidationPipe } from '../../security/file-validation.pipe';
 
 describe('OcrController', () => {
   let controller: OcrController;
@@ -33,9 +31,9 @@ describe('OcrController', () => {
         },
       ],
     })
-    .overrideGuard(ThrottlerGuard)
-    .useValue({ canActivate: () => true }) // Mock throttler for tests
-    .compile();
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true }) // Mock throttler for tests
+      .compile();
 
     controller = module.get<OcrController>(OcrController);
     service = module.get<OcrService>(OcrService);
@@ -99,9 +97,9 @@ describe('OcrController', () => {
     it('should throw error when no file is uploaded', async () => {
       const emptyFile = { ...mockFile, buffer: undefined };
 
-      await expect(controller.uploadFile(emptyFile as any)).rejects.toThrow(
-        'No file uploaded',
-      );
+      await expect(
+        controller.uploadFile(emptyFile as Express.Multer.File),
+      ).rejects.toThrow('No file uploaded');
 
       expect(mockOcrService.processOCR).not.toHaveBeenCalled();
     });
@@ -134,7 +132,7 @@ describe('OcrController', () => {
             height: 15,
             wordId: 1,
             lineId: 0,
-            confidence: 0.95
+            confidence: 0.95,
           },
           {
             text: 'World',
@@ -144,9 +142,9 @@ describe('OcrController', () => {
             height: 15,
             wordId: 2,
             lineId: 0,
-            confidence: 0.92
-          }
-        ]
+            confidence: 0.92,
+          },
+        ],
       };
 
       mockOcrService.processEnhancedOCR.mockResolvedValue(mockResult);
@@ -183,15 +181,17 @@ describe('OcrController', () => {
     it('should throw error when no file is uploaded', async () => {
       const emptyFile = { ...mockFile, buffer: undefined };
 
-      await expect(controller.uploadFileEnhanced(emptyFile as any)).rejects.toThrow(
-        'No file uploaded',
-      );
+      await expect(
+        controller.uploadFileEnhanced(emptyFile as Express.Multer.File),
+      ).rejects.toThrow('No file uploaded');
 
       expect(mockOcrService.processEnhancedOCR).not.toHaveBeenCalled();
     });
 
     it('should propagate service errors', async () => {
-      mockOcrService.processEnhancedOCR.mockRejectedValue(new Error('Enhanced OCR failed'));
+      mockOcrService.processEnhancedOCR.mockRejectedValue(
+        new Error('Enhanced OCR failed'),
+      );
 
       await expect(controller.uploadFileEnhanced(mockFile)).rejects.toThrow(
         'Enhanced OCR processing failed',
@@ -207,14 +207,16 @@ describe('OcrController', () => {
     });
 
     it('should have upload and enhanced upload methods', () => {
-      expect(typeof controller.uploadFile).toBe('function');
-      expect(typeof controller.uploadFileEnhanced).toBe('function');
+      expect(typeof controller.uploadFile.bind(controller)).toBe('function');
+      expect(typeof controller.uploadFileEnhanced.bind(controller)).toBe(
+        'function',
+      );
     });
 
     it('should handle file validation in integration', () => {
       // This will be tested in e2e tests where the full pipeline runs
-      expect(controller.uploadFile).toBeDefined();
-      expect(controller.uploadFileEnhanced).toBeDefined();
+      expect(controller.uploadFile.bind(controller)).toBeDefined();
+      expect(controller.uploadFileEnhanced.bind(controller)).toBeDefined();
     });
   });
 });

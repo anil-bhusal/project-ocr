@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
+import { Request, Response, NextFunction } from 'express';
 import { AppModule } from './app.module';
 import { SecurityExceptionFilter } from './security/security-exception.filter';
 
@@ -13,49 +14,59 @@ async function bootstrap() {
     // add body size limits for security
     bodyParser: true,
   });
-  
+
   // request size limits (prevent memory exhaustion)
-  app.use((req, res, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     // skip file upload endpoints ... they're handled by multer
     if (req.path.includes('/upload')) {
       return next();
     }
-    
+
     // limit regular JSON/form requests to 1MB
-    if (req.headers['content-type']?.includes('application/json') || 
-        req.headers['content-type']?.includes('application/x-www-form-urlencoded')) {
+    const contentType = req.headers['content-type'];
+    if (
+      contentType?.includes('application/json') ||
+      contentType?.includes('application/x-www-form-urlencoded')
+    ) {
       const contentLength = parseInt(req.headers['content-length'] || '0', 10);
-      if (contentLength > 1024 * 1024) { // 1MB
-        return res.status(413).json({ 
-          statusCode: 413, 
-          message: 'Request entity too large' 
+      if (contentLength > 1024 * 1024) {
+        // 1MB
+        return res.status(413).json({
+          statusCode: 413,
+          message: 'Request entity too large',
         });
       }
     }
     next();
   });
-  
-  // security headers
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"], // allow inline styles for Swagger UI
-        scriptSrc: ["'self'"], 
-        imgSrc: ["'self'", "data:", "blob:"], // allow data URLs for images
-        connectSrc: ["'self'"], 
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
-      },
-    },
-    crossOriginEmbedderPolicy: false, // allow file uploads
-  }));
 
-  // enhanced CORS configuration (preserving existing functionality)
+  // security headers
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"], // allow inline styles for Swagger UI
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'blob:'], // allow data URLs for images
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // allow file uploads
+    }),
+  );
+
+  // enhanced CORS configuration
+  const allowedOrigins = process.env.NODE_ENV === 'development' 
+    ? ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000']
+    : [process.env.FRONTEND_URL || 'http://localhost:5173'];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
     credentials: false,
@@ -78,7 +89,9 @@ async function bootstrap() {
   // swagger api  documentation setup
   const config = new DocumentBuilder()
     .setTitle('OCR API')
-    .setDescription('Advanced OCR API with text extraction and word positioning')
+    .setDescription(
+      'Advanced OCR API with text extraction and word positioning',
+    )
     .setVersion('1.0')
     .addTag('ocr', 'OCR processing endpoints')
     .addTag('health', 'Health check endpoints')
@@ -98,4 +111,6 @@ async function bootstrap() {
   console.log('Hi, Server running on http://localhost:5000');
   console.log('API Documentation available at http://localhost:5000/api-docs');
 }
-bootstrap();
+
+// Handle unhandled promise rejection
+void bootstrap();

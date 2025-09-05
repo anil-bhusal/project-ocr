@@ -25,17 +25,23 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     if (exception instanceof ThrottlerException) {
       status = HttpStatus.TOO_MANY_REQUESTS;
       message = 'Too many requests, please try again later';
-      
+
       // log rate limit violations for security monitoring
-      this.logger.warn(`Rate limit exceeded: ${request.ip} - ${request.method} ${request.url}`);
+      this.logger.warn(
+        `Rate limit exceeded: ${request.ip} - ${request.method} ${request.url}`,
+      );
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
-      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        message = (exceptionResponse as any).message || exception.message;
+      } else if (
+        typeof exceptionResponse === 'object' &&
+        exceptionResponse !== null
+      ) {
+        const responseObj = exceptionResponse as { message?: string };
+        message = responseObj.message || exception.message;
       }
     } else if (exception instanceof Error) {
       // handle known errors (preserve existing ocr error messages)
@@ -62,7 +68,7 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     }
 
     // log security-relevant errors
-    if (status >= 400) {
+    if (status >= HttpStatus.BAD_REQUEST) {
       const errorDetails = {
         timestamp: new Date().toISOString(),
         path: request.url,
@@ -70,16 +76,22 @@ export class SecurityExceptionFilter implements ExceptionFilter {
         ip: request.ip,
         userAgent: request.headers['user-agent'],
         status,
-        message: typeof exception === 'object' && exception !== null && 'message' in exception 
-          ? (exception as Error).message 
-          : 'Unknown error',
+        message:
+          typeof exception === 'object' &&
+          exception !== null &&
+          'message' in exception
+            ? (exception as Error).message
+            : 'Unknown error',
       };
 
-      if (status >= 500) {
-        this.logger.error('Server error occurred', JSON.stringify(errorDetails));
-      } else if (status === 429) {
+      if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+        this.logger.error(
+          'Server error occurred',
+          JSON.stringify(errorDetails),
+        );
+      } else if (status === HttpStatus.TOO_MANY_REQUESTS) {
         this.logger.warn('Rate limit violation', JSON.stringify(errorDetails));
-      } else if (status >= 400) {
+      } else if (status >= HttpStatus.BAD_REQUEST) {
         this.logger.log('Client error', JSON.stringify(errorDetails));
       }
     }
@@ -93,8 +105,12 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     };
 
     // don't include stack traces in production
-    if (process.env.NODE_ENV !== 'production' && exception instanceof Error && exception.stack) {
-      (errorResponse as any).stack = exception.stack;
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      exception instanceof Error &&
+      exception.stack
+    ) {
+      (errorResponse as { stack?: string }).stack = exception.stack;
     }
 
     response.status(status).json(errorResponse);

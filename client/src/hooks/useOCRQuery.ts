@@ -3,9 +3,13 @@ import { ocrService } from '../api/ocr-service';
 import type { EnhancedOCRResponse } from '../types/ocr-types';
 import type { OCRUploadOptions } from '../api/ocr-service';
 
+interface ErrorWithStatus {
+  status?: number;
+}
+
 interface UseOCRMutationOptions {
   onSuccess?: (data: EnhancedOCRResponse) => void;
-  onError?: (error: any) => void;
+  onError?: (error: { status?: number; message: string }) => void;
   onSettled?: () => void;
 }
 
@@ -26,9 +30,10 @@ export const useOCRMutation = (options?: UseOCRMutationOptions) => {
       options?.onSettled?.();
     },
     // retry configuration specific to this mutation
-    retry: (failureCount, error: any) => {
+    retry: (failureCount, error) => {
       // don't retry client errors
-      if (error?.status >= 400 && error?.status < 500) {
+      const errorStatus = (error as ErrorWithStatus)?.status;
+      if (errorStatus && errorStatus >= 400 && errorStatus < 500) {
         return false;
       }
       // retry up to 2 times for server/network errors

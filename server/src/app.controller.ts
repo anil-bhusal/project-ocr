@@ -12,7 +12,7 @@ export class AppController {
   @Get()
   @ApiOperation({
     summary: 'Health check endpoint',
-    description: 'Returns a simple greeting to verify the API is running'
+    description: 'Returns a simple greeting to verify the API is running',
   })
   @ApiResponse({
     status: 200,
@@ -23,9 +23,9 @@ export class AppController {
         statusCode: 200,
         success: true,
         message: 'API is running successfully',
-        data: 'Hello World!'
-      }
-    }
+        data: 'Hello World!',
+      },
+    },
   })
   getHello(): ResponseDto<string> {
     const greeting = this.appService.getHello();

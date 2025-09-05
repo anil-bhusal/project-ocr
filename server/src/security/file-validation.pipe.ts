@@ -10,10 +10,15 @@ export class FileValidationPipe implements PipeTransform {
     'image/png',
     'image/gif',
     'image/bmp',
-    'image/webp'
+    'image/webp',
   ];
   private readonly allowedExtensions = [
-    '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.bmp',
+    '.webp',
   ];
 
   transform(file: Express.Multer.File) {
@@ -25,14 +30,14 @@ export class FileValidationPipe implements PipeTransform {
     // file size validation
     if (file.size > this.maxSize) {
       throw new BadRequestException(
-        `File size too large. Maximum allowed size is ${this.maxSize / 1024 / 1024}MB`
+        `File size too large. Maximum allowed size is ${this.maxSize / 1024 / 1024}MB`,
       );
     }
 
     // MIME type validation
     if (!this.allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(
-        `Invalid file type. Allowed types: ${this.allowedMimeTypes.join(', ')}`
+        `Invalid file type. Allowed types: ${this.allowedMimeTypes.join(', ')}`,
       );
     }
 
@@ -40,22 +45,20 @@ export class FileValidationPipe implements PipeTransform {
     const fileExtension = this.getFileExtension(file.originalname);
     if (!this.allowedExtensions.includes(fileExtension)) {
       throw new BadRequestException(
-        `Invalid file extension. Allowed extensions: ${this.allowedExtensions.join(', ')}`
+        `Invalid file extension. Allowed extensions: ${this.allowedExtensions.join(', ')}`,
       );
     }
 
     // basic magic number validation for common image formats
     if (!this.validateMagicNumbers(file.buffer)) {
       throw new BadRequestException(
-        'File content does not match the declared file type'
+        'File content does not match the declared file type',
       );
     }
 
     // filename sanitization (preserve original name but check for dangerous characters)
     if (this.containsDangerousCharacters(file.originalname)) {
-      throw new BadRequestException(
-        'Filename contains invalid characters'
-      );
+      throw new BadRequestException('Filename contains invalid characters');
     }
 
     return file;
@@ -67,6 +70,7 @@ export class FileValidationPipe implements PipeTransform {
 
   private containsDangerousCharacters(filename: string): boolean {
     // check for dangerous characters that could be used for path traversal or code injection
+    // eslint-disable-next-line no-control-regex
     const dangerousChars = /[<>:"|?*\x00-\x1f]/;
     const pathTraversal = /\.\./;
     return dangerousChars.test(filename) || pathTraversal.test(filename);

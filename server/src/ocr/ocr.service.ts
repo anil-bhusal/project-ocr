@@ -2,16 +2,45 @@ import { Injectable } from '@nestjs/common';
 import FormData from 'form-data';
 import fetch from 'node-fetch';
 import { TextParserService } from './text-parser.service';
-import { OCRWordDto, OCRLineDto, EnhancedOCRResponseDto } from './dto/enhanced-ocr.dto';
+import {
+  OCRWordDto,
+  OCRLineDto,
+  EnhancedOCRResponseDto,
+} from './dto/enhanced-ocr.dto';
+
+interface OCRWord {
+  WordText: string;
+  Left: number;
+  Top: number;
+  Height: number;
+  Width: number;
+  Confidence?: number;
+}
+
+interface OCRLine {
+  LineText: string;
+  Words: OCRWord[];
+}
+
+interface OCRApiResponse {
+  ParsedResults?: Array<{
+    ParsedText?: string;
+    TextOverlay?: {
+      Lines?: OCRLine[];
+    };
+  }>;
+  OCRExitCode?: number;
+  IsErroredOnProcessing?: boolean;
+  ErrorMessage?: string;
+  ErrorDetails?: string;
+}
 
 @Injectable()
 export class OcrService {
   private OCRKey = process.env.OCR_API_KEY;
   private OCRURL = process.env.OCR_API_URL;
 
-  constructor(
-    private readonly textParserService: TextParserService
-  ) { }
+  constructor(private readonly textParserService: TextParserService) {}
 
   // previous / old method for backward compatibility
   async processOCR(
@@ -19,10 +48,10 @@ export class OcrService {
   ): Promise<{ text: string; words: OCRWordDto[] }> {
     const result = await this.processEnhancedOCR(file);
     // reconstruct text from words for backward compatibility
-    const text = result.words.map(w => w.text).join(' ');
+    const text = result.words.map((w) => w.text).join(' ');
     return {
       text: text,
-      words: result.words
+      words: result.words,
     };
   }
 
@@ -52,14 +81,14 @@ export class OcrService {
 
     const res = await fetch(this.OCRURL, {
       method: 'POST',
-      body: formData as any,
+      body: formData,
     });
 
     if (!res.ok) {
       throw new Error(`OCR API request failed with status: ${res.status}`);
     }
 
-    const data: any = await res.json();
+    const data = (await res.json()) as OCRApiResponse;
 
     if (data.OCRExitCode !== 1) {
       throw new Error(
@@ -76,8 +105,8 @@ export class OcrService {
     let wordIdCounter = 0;
 
     if (textOverlay?.Lines) {
-      textOverlay.Lines.forEach((line: any, lineIndex: number) => {
-        const lineWords: OCRWordDto[] = line.Words.map((w: any) => ({
+      textOverlay.Lines.forEach((line: OCRLine, lineIndex: number) => {
+        const lineWords: OCRWordDto[] = line.Words.map((w: OCRWord) => ({
           text: w.WordText,
           left: w.Left,
           top: w.Top,
@@ -85,16 +114,16 @@ export class OcrService {
           height: w.Height,
           wordId: ++wordIdCounter,
           lineId: lineIndex,
-          confidence: w.Confidence || 0.8
+          confidence: w.Confidence || 0.8,
         }));
 
         allWords.push(...lineWords);
 
         // calculate line boundaries
-        const lineLeft = Math.min(...lineWords.map(w => w.left));
-        const lineTop = Math.min(...lineWords.map(w => w.top));
-        const lineRight = Math.max(...lineWords.map(w => w.left + w.width));
-        const lineBottom = Math.max(...lineWords.map(w => w.top + w.height));
+        const lineLeft = Math.min(...lineWords.map((w) => w.left));
+        const lineTop = Math.min(...lineWords.map((w) => w.top));
+        const lineRight = Math.max(...lineWords.map((w) => w.left + w.width));
+        const lineBottom = Math.max(...lineWords.map((w) => w.top + w.height));
 
         lines.push({
           lineId: lineIndex,
@@ -103,22 +132,22 @@ export class OcrService {
           top: lineTop,
           width: lineRight - lineLeft,
           height: lineBottom - lineTop,
-          text: lineWords.map(w => w.text).join(' ')
+          text: lineWords.map((w) => w.text).join(' '),
         });
       });
     } else {
       // fallback: Create word boundaries from parsed text
-      const estimatedSize = this.textParserService.estimateImageDimensions(parsedText);
+      const estimatedSize =
+        this.textParserService.estimateImageDimensions(parsedText);
       const parsedData = this.textParserService.createWordsFromText(
         parsedText,
         estimatedSize.width,
-        estimatedSize.height
+        estimatedSize.height,
       );
 
       allWords.push(...parsedData.words);
       lines.push(...parsedData.lines);
     }
-
 
     return {
       words: allWords,

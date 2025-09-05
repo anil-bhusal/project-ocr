@@ -3,7 +3,7 @@ import type { EnhancedOCRResponse } from '../types/ocr-types';
 
 interface OCRUploadOptions {
   file: File;
-  onUploadProgress?: (progressEvent: any) => void;
+  onUploadProgress?: (progressEvent: { loaded: number; total?: number }) => void;
 }
 
 interface APIResponse<T> {

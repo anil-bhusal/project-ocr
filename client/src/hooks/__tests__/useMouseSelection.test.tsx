@@ -4,13 +4,18 @@ import { useMouseSelection } from '../useMouseSelection'
 
 describe('useMouseSelection', () => {
   it('should return mouse selection handlers', () => {
+    // Create mock DOM elements
+    const mockImage = document.createElement('img') as HTMLImageElement;
+    const mockContainer = document.createElement('div') as HTMLDivElement;
+    const mockSelectionBox = document.createElement('div') as HTMLDivElement;
+    
     const props = {
       ocrData: null,
-      imageRef: { current: null },
-      containerRef: { current: null },
-      selectionBoxRef: { current: null },
+      imageRef: { current: mockImage },
+      containerRef: { current: mockContainer },
+      selectionBoxRef: { current: mockSelectionBox },
       wordSelection: {
-        wordIds: new Set(),
+        wordIds: new Set<number>(),
         selectedWords: [],
         selectedText: ''
       },
@@ -24,7 +29,7 @@ describe('useMouseSelection', () => {
       zoomLevel: 1,
     }
 
-    const { result } = renderHook(() => useMouseSelection(props as any))
+    const { result } = renderHook(() => useMouseSelection(props))
     
     expect(typeof result.current.handleMouseDown).toBe('function')
     expect(typeof result.current.handleMouseUp).toBe('function')

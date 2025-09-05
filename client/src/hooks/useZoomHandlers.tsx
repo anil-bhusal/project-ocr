@@ -48,7 +48,7 @@ export const useZoomHandlers = ({ containerRef, showFloatingInput, wordSelection
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [showFloatingInput, wordSelectionLength, setZoomLevel, setShowFloatingInput]);
+  }, [showFloatingInput, wordSelectionLength, setZoomLevel, setShowFloatingInput, containerRef]);
 
   return {
     handleZoomIn,

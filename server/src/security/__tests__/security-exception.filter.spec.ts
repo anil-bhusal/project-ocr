@@ -4,8 +4,16 @@ import { SecurityExceptionFilter } from '../security-exception.filter';
 
 describe('SecurityExceptionFilter', () => {
   let filter: SecurityExceptionFilter;
-  let mockResponse: any;
-  let mockRequest: any;
+  let mockResponse: {
+    status: jest.Mock;
+    json: jest.Mock;
+  };
+  let mockRequest: {
+    ip: string;
+    method: string;
+    url: string;
+    headers: Record<string, string>;
+  };
   let mockHost: ArgumentsHost;
 
   const originalEnv = process.env.NODE_ENV;
@@ -17,7 +25,7 @@ describe('SecurityExceptionFilter', () => {
 
     mockResponse = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn(),
     };
 
     mockRequest = {
@@ -25,16 +33,16 @@ describe('SecurityExceptionFilter', () => {
       method: 'POST',
       url: '/ocr/upload',
       headers: {
-        'user-agent': 'test-agent'
-      }
+        'user-agent': 'test-agent',
+      },
     };
 
     mockHost = {
       switchToHttp: jest.fn().mockReturnValue({
-        getResponse: () => mockResponse,
-        getRequest: () => mockRequest
-      })
-    } as any;
+        getResponse: (): typeof mockResponse => mockResponse,
+        getRequest: (): typeof mockRequest => mockRequest,
+      }),
+    } as unknown as ArgumentsHost;
 
     // Mock console.log to avoid test output pollution
     jest.spyOn(console, 'log').mockImplementation();
@@ -50,7 +58,10 @@ describe('SecurityExceptionFilter', () => {
 
   describe('HTTP Exception handling', () => {
     it('should handle BadRequestException correctly', () => {
-      const exception = new HttpException('Invalid file format', HttpStatus.BAD_REQUEST);
+      const exception = new HttpException(
+        'Invalid file format',
+        HttpStatus.BAD_REQUEST,
+      );
 
       filter.catch(exception, mockHost);
 
@@ -60,17 +71,20 @@ describe('SecurityExceptionFilter', () => {
           statusCode: 400,
           message: 'Invalid file format',
           timestamp: expect.any(String),
-          path: '/ocr/upload'
-        })
+          path: '/ocr/upload',
+        }),
       );
     });
 
     it('should handle complex HttpException response objects', () => {
       const exceptionResponse = {
         message: ['file is too large', 'invalid format'],
-        error: 'Bad Request'
+        error: 'Bad Request',
       };
-      const exception = new HttpException(exceptionResponse, HttpStatus.BAD_REQUEST);
+      const exception = new HttpException(
+        exceptionResponse,
+        HttpStatus.BAD_REQUEST,
+      );
 
       filter.catch(exception, mockHost);
 
@@ -78,8 +92,8 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 400,
-          message: ['file is too large', 'invalid format']
-        })
+          message: ['file is too large', 'invalid format'],
+        }),
       );
     });
   });
@@ -95,7 +109,7 @@ describe('SecurityExceptionFilter', () => {
         statusCode: 429,
         message: 'Too many requests, please try again later',
         timestamp: expect.any(String),
-        path: '/ocr/upload'
+        path: '/ocr/upload',
       });
     });
   });
@@ -110,13 +124,15 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 400,
-          message: 'No file uploaded'
-        })
+          message: 'No file uploaded',
+        }),
       );
     });
 
     it('should handle OCR processing failures', () => {
-      const exception = new Error('OCR processing failed: Invalid API response');
+      const exception = new Error(
+        'OCR processing failed: Invalid API response',
+      );
 
       filter.catch(exception, mockHost);
 
@@ -124,8 +140,8 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 500,
-          message: 'OCR processing failed'
-        })
+          message: 'OCR processing failed',
+        }),
       );
     });
 
@@ -138,8 +154,8 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 400,
-          message: 'File buffer is empty'
-        })
+          message: 'File buffer is empty',
+        }),
       );
     });
 
@@ -152,8 +168,8 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 503,
-          message: 'OCR service temporarily unavailable'
-        })
+          message: 'OCR service temporarily unavailable',
+        }),
       );
     });
   });
@@ -172,8 +188,8 @@ describe('SecurityExceptionFilter', () => {
           message: 'An error occurred while processing your request',
           statusCode: 500,
           timestamp: expect.any(String),
-          path: '/ocr/upload'
-        })
+          path: '/ocr/upload',
+        }),
       );
 
       process.env.NODE_ENV = originalEnv;
@@ -192,8 +208,8 @@ describe('SecurityExceptionFilter', () => {
           message: 'Detailed internal error message',
           statusCode: 500,
           timestamp: expect.any(String),
-          path: '/ocr/upload'
-        })
+          path: '/ocr/upload',
+        }),
       );
 
       process.env.NODE_ENV = originalEnv;
@@ -210,8 +226,8 @@ describe('SecurityExceptionFilter', () => {
 
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          stack: expect.stringContaining('Error: Test error')
-        })
+          stack: expect.stringContaining('Error: Test error'),
+        }),
       );
 
       process.env.NODE_ENV = originalEnv;
@@ -243,8 +259,8 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 500,
-          message: 'Internal server error'
-        })
+          message: 'Internal server error',
+        }),
       );
     });
 
@@ -255,8 +271,8 @@ describe('SecurityExceptionFilter', () => {
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: 500,
-          message: 'Internal server error'
-        })
+          message: 'Internal server error',
+        }),
       );
     });
   });
@@ -271,9 +287,11 @@ describe('SecurityExceptionFilter', () => {
         expect.objectContaining({
           statusCode: expect.any(Number),
           message: expect.any(String),
-          timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
-          path: '/ocr/upload'
-        })
+          timestamp: expect.stringMatching(
+            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+          ),
+          path: '/ocr/upload',
+        }),
       );
     });
 
